@@ -1,7 +1,8 @@
 'use client'
 
-import { FC } from 'react'
-import { KanbanBoard, UncontrolledBoard } from '@caldwell619/react-kanban'
+import type { FC } from 'react'
+import { type KanbanBoard, UncontrolledBoard } from '@caldwell619/react-kanban'
+import './styles.module.css'
 
 
 // KANBAN IMPLEMENTATION EXAMPLE:
@@ -26,6 +27,17 @@ const UncontrolledBoardDemo: FC = () => {
                 cards: [
                     {
                         id: 12,
+                        title: 'Add card',
+                        description: 'Add capability to add a card in a column'
+                    },
+                ]
+            },
+            {
+                id: 3,
+                title: 'Backlog 2',
+                cards: [
+                    {
+                        id: 4,
                         title: 'Add card',
                         description: 'Add capability to add a card in a column'
                     },
