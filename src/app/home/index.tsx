@@ -6,7 +6,11 @@ import {
 	CardDescription,
 	CardFooter,
 	CardHeader,
+	CardTitle,
 } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogClose, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { ChevronDown, PlusIcon, SquarePenIcon } from "lucide-react";
 import { useState } from "react";
 
@@ -17,6 +21,11 @@ interface CardProps {
 
 export default function Funnels() {
 	const [cards, setCard] = useState<CardProps[]>([]);
+	const [openDialog, setOpenDialog] = useState(false);
+
+	const handleAddCard = () => {
+		setOpenDialog(true);
+	};
 
 	return (
 		<div className="flex flex-col h-screen p-8">
@@ -27,7 +36,7 @@ export default function Funnels() {
 				</Button>
 
 				<div className="flex gap-4">
-					<Button>
+					<Button onClick={handleAddCard}>
 						<PlusIcon size={16} />
 						Novo card
 					</Button>
@@ -39,6 +48,36 @@ export default function Funnels() {
 			</div>
 
 			<main className="flex-1 overflow-hidden mb-10">
+				<Dialog onOpenChange={setOpenDialog} open={openDialog}>
+					<DialogContent>
+						<form>
+							<DialogHeader>
+								<DialogTitle>Novo card</DialogTitle>
+								<DialogDescription>Adicione um novo card</DialogDescription>
+							</DialogHeader>
+
+							<div className="grid gap-4">
+								<div className="grid gap-3">
+									<Label htmlFor="name-1">Name</Label>
+									<Input id="name-1" name="name" defaultValue="Pedro Duarte" />
+								</div>
+								<div className="grid gap-3">
+									<Label htmlFor="username-1">Username</Label>
+									<Input id="username-1" name="username" defaultValue="@peduarte" />
+								</div>
+							</div>
+
+							<DialogFooter>
+								<Button type="submit">Salvar</Button>
+								<DialogClose asChild>
+									<Button variant="outline">Cancel</Button>
+								</DialogClose>
+							</DialogFooter>
+						</form>
+
+					</DialogContent>
+				</Dialog>
+
 				<div className="grid grid-cols-4 gap-4 h-full">
 					<div className="shadow rounded-t-md flex flex-col">
 						<div className="flex justify-between items-center p-3 py-4 bg-white font-semibold rounded-t-md z-10">
@@ -50,19 +89,20 @@ export default function Funnels() {
 							</div>
 
 							<div className="text-xl">
-								<PlusIcon size={20} />
+								<Button onClick={handleAddCard} variant={"ghost"}>
+									<PlusIcon size={20} />
+								</Button>
 							</div>
 						</div>
 
-						<div className="h-full border ">
+						<div className="h-full border">
 							{cards && cards.length > 0 ? (
 								cards.map((card) => (
-									<div
-										key={card.id}
-										className="bg-white rounded p-3 shadow text-sm"
-									>
-										{card.title}
-									</div>
+									<Card key={card.id} className="m-2">
+										<CardHeader>
+											<CardTitle>{card.title}</CardTitle>
+										</CardHeader>
+									</Card>
 								))
 							) : (
 								<Card className="text-center m-2 border-dashed gap-0 text-sm">
@@ -72,7 +112,7 @@ export default function Funnels() {
 										</CardDescription>
 									</CardHeader>
 									<CardFooter className="justify-center">
-										<Button className="hover:bg-gray-100 border-none shadow-none">
+										<Button onClick={handleAddCard} className="hover:bg-gray-100 border-none shadow-none">
 											<PlusIcon size={16} />
 											<span>Adicionar Card</span>
 										</Button>
