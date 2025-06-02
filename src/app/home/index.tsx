@@ -8,9 +8,10 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogClose, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter, DialogClose, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ChevronDown, PlusIcon, SquarePenIcon } from "lucide-react";
 import { useState } from "react";
 
@@ -49,28 +50,80 @@ export default function Funnels() {
 
 			<main className="flex-1 overflow-hidden mb-10">
 				<Dialog onOpenChange={setOpenDialog} open={openDialog}>
-					<DialogContent>
-						<form>
-							<DialogHeader>
-								<DialogTitle>Novo card</DialogTitle>
-								<DialogDescription>Adicione um novo card</DialogDescription>
+					<DialogContent className="w-min-[900px] h-[85vh] flex flex-col">
+						<form className="flex flex-col flex-1 overflow-hidden">
+							<DialogHeader className="pb-3">
+								<DialogTitle>Criar Novo Card</DialogTitle>
 							</DialogHeader>
 
-							<div className="grid gap-4">
-								<div className="grid gap-3">
-									<Label htmlFor="name-1">Name</Label>
-									<Input id="name-1" name="name" defaultValue="Pedro Duarte" />
+							<div className="flex-1 flex gap-4 overflow-y-auto">
+								<div className="grid gap-4">
+									<div className="grid gap-3">
+										<Label htmlFor="name-1">Tipo</Label>
+										<Select>
+											<SelectTrigger className="w-full">
+												<SelectValue placeholder="Pessoa ..." />
+											</SelectTrigger>
+											<SelectContent>
+												<SelectItem value="light">Pessoa Física</SelectItem>
+												<SelectItem value="dark">Pessoa Jurídica</SelectItem>
+											</SelectContent>
+										</Select>
+									</div>
+
+									<div className="grid gap-3">
+										<Label htmlFor="name-1">Name</Label>
+										<Input id="name-1" name="name" placeholder="Nome completo" />
+									</div>
+
+									<div className="grid gap-3">
+										<Label htmlFor="username-1">CPF</Label>
+										<Input id="username-1" name="cpf" placeholder="000.000.000-00" />
+									</div>
+
+									<div className="grid gap-3">
+										<Label htmlFor="username-1">Email</Label>
+										<Input id="username-1" name="email" placeholder="Email" />
+									</div>
+
+									<div className="grid gap-3">
+										<Label htmlFor="username-1">Telefone</Label>
+										<Input id="username-1" name="telefone" placeholder="(00) 00000-0000" />
+									</div>
+
+									<div className="grid gap-3">
+										<Label htmlFor="username-1">WhatsApp</Label>
+										<Input id="username-1" name="whatsapp" placeholder="(00) 00000-0000" />
+									</div>
+
+									<div className="grid gap-3">
+										<Label htmlFor="username-1">CEP</Label>
+										<Input id="username-1" name="cep" placeholder="00000-000" />
+									</div>
+
+									<div className="grid gap-3">
+										<Label htmlFor="username-1">Endereço</Label>
+										<Input id="username-1" name="endereco" placeholder="Endereço" />
+									</div>
+
+									<div className="grid gap-3">
+										<Label htmlFor="username-1">Valor</Label>
+										<Input id="username-1" name="value" placeholder="R$ 100,00" />
+									</div>
+
+
 								</div>
-								<div className="grid gap-3">
-									<Label htmlFor="username-1">Username</Label>
-									<Input id="username-1" name="username" defaultValue="@peduarte" />
+
+								<div>
+									{/* table options */}
 								</div>
+
 							</div>
 
 							<DialogFooter>
-								<Button type="submit">Salvar</Button>
+								<Button type="submit">Criar Card</Button>
 								<DialogClose asChild>
-									<Button variant="outline">Cancel</Button>
+									<Button variant="outline">Cancelar</Button>
 								</DialogClose>
 							</DialogFooter>
 						</form>
