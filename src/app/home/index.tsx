@@ -8,12 +8,26 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogFooter, DialogClose, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+	Dialog,
+	DialogContent,
+	DialogFooter,
+	DialogClose,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 import { ChevronDown, PlusIcon, SquarePenIcon } from "lucide-react";
 import { useState } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface CardProps {
 	id: number;
@@ -73,12 +87,20 @@ export default function Funnels() {
 
 									<div className="grid gap-3">
 										<Label htmlFor="name-1">Name</Label>
-										<Input id="name-1" name="name" placeholder="Nome completo" />
+										<Input
+											id="name-1"
+											name="name"
+											placeholder="Nome completo"
+										/>
 									</div>
 
 									<div className="grid gap-3">
 										<Label htmlFor="username-1">CPF</Label>
-										<Input id="username-1" name="cpf" placeholder="000.000.000-00" />
+										<Input
+											id="username-1"
+											name="cpf"
+											placeholder="000.000.000-00"
+										/>
 									</div>
 
 									<div className="grid gap-3">
@@ -88,12 +110,20 @@ export default function Funnels() {
 
 									<div className="grid gap-3">
 										<Label htmlFor="username-1">Telefone</Label>
-										<Input id="username-1" name="telefone" placeholder="(00) 00000-0000" />
+										<Input
+											id="username-1"
+											name="telefone"
+											placeholder="(00) 00000-0000"
+										/>
 									</div>
 
 									<div className="grid gap-3">
 										<Label htmlFor="username-1">WhatsApp</Label>
-										<Input id="username-1" name="whatsapp" placeholder="(00) 00000-0000" />
+										<Input
+											id="username-1"
+											name="whatsapp"
+											placeholder="(00) 00000-0000"
+										/>
 									</div>
 
 									<div className="grid gap-3">
@@ -103,21 +133,45 @@ export default function Funnels() {
 
 									<div className="grid gap-3">
 										<Label htmlFor="username-1">Endereço</Label>
-										<Input id="username-1" name="endereco" placeholder="Endereço" />
+										<Input
+											id="username-1"
+											name="endereco"
+											placeholder="Endereço"
+										/>
 									</div>
 
 									<div className="grid gap-3">
 										<Label htmlFor="username-1">Valor</Label>
-										<Input id="username-1" name="value" placeholder="R$ 100,00" />
+										<Input
+											id="username-1"
+											name="value"
+											placeholder="R$ 100,00"
+										/>
 									</div>
-
-
 								</div>
 
-								<div>
-									{/* table options */}
+								<div className="flex flex-col gap-4 mt-6">
+									<Tabs defaultValue="support" className="w-[400px]">
+										<TabsList className="bg-gray-200">
+											<TabsTrigger value="support">Suporte</TabsTrigger>
+											<TabsTrigger value="files">Arquivos</TabsTrigger>
+											<TabsTrigger value="agenda">Agenda</TabsTrigger>
+											<TabsTrigger value="history">Histórico</TabsTrigger>
+										</TabsList>
+										<TabsContent value="support">
+											Make changes to your account here.
+										</TabsContent>
+										<TabsContent value="files">
+											Change your password here.
+										</TabsContent>
+										<TabsContent value="agenda">
+											Change your password here.
+										</TabsContent>
+										<TabsContent value="history">
+											Change your password here.
+										</TabsContent>
+									</Tabs>
 								</div>
-
 							</div>
 
 							<DialogFooter>
@@ -127,7 +181,6 @@ export default function Funnels() {
 								</DialogClose>
 							</DialogFooter>
 						</form>
-
 					</DialogContent>
 				</Dialog>
 
@@ -165,7 +218,10 @@ export default function Funnels() {
 										</CardDescription>
 									</CardHeader>
 									<CardFooter className="justify-center">
-										<Button onClick={handleAddCard} className="hover:bg-gray-100 border-none shadow-none">
+										<Button
+											onClick={handleAddCard}
+											className="hover:bg-gray-100 border-none shadow-none"
+										>
 											<PlusIcon size={16} />
 											<span>Adicionar Card</span>
 										</Button>
