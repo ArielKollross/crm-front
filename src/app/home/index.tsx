@@ -230,6 +230,9 @@ export default function Funnels() {
 
 								<div className="flex flex-col gap-4 mt-6 max-w-fit">
 									<div className="font-semibold">Status do Funil</div>
+									<div>
+										Analista pode mudar status do cliente nesta coluna, enviado diretamente para um coluna especifica.s
+									</div>
 								</div>
 							</div>
 
