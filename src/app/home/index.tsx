@@ -10,9 +10,9 @@ import {
 } from "@/components/ui/card";
 import {
 	Dialog,
+	DialogClose,
 	DialogContent,
 	DialogFooter,
-	DialogClose,
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
@@ -25,9 +25,9 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChevronDown, PlusIcon, SquarePenIcon } from "lucide-react";
 import { useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface CardProps {
 	id: number;
@@ -37,10 +37,29 @@ interface CardProps {
 export default function Funnels() {
 	const [cards, setCard] = useState<CardProps[]>([]);
 	const [openDialog, setOpenDialog] = useState(false);
+	const [registerType, setRegisterType] = useState("individual");
 
 	const handleAddCard = () => {
 		setOpenDialog(true);
+
+		setCard((prevCards) => [
+			...prevCards,
+			{
+				id: prevCards.length + 1,
+				title: `Card ${prevCards.length + 1}`,
+			},
+		]);
 	};
+
+	function handleSubmit() {
+		setCard((prevCards) => [
+			...prevCards,
+			{
+				id: prevCards.length + 1,
+				title: `Card ${prevCards.length + 1}`,
+			},
+		]);
+	}
 
 	return (
 		<div className="flex flex-col h-screen p-8">
@@ -64,7 +83,7 @@ export default function Funnels() {
 
 			<main className="flex-1 overflow-hidden mb-10">
 				<Dialog onOpenChange={setOpenDialog} open={openDialog}>
-					<DialogContent className="w-min-[900px] h-[85vh] flex flex-col">
+					<DialogContent className="md:max-w-fit md:h-[85vh] flex flex-col">
 						<form className="flex flex-col flex-1 overflow-hidden">
 							<DialogHeader className="pb-3">
 								<DialogTitle>Criar Novo Card</DialogTitle>
@@ -74,38 +93,65 @@ export default function Funnels() {
 								<div className="grid gap-4">
 									<div className="grid gap-3">
 										<Label htmlFor="name-1">Tipo</Label>
-										<Select>
+										<Select defaultValue="individual" onValueChange={setRegisterType}>
 											<SelectTrigger className="w-full">
 												<SelectValue placeholder="Pessoa ..." />
 											</SelectTrigger>
 											<SelectContent>
-												<SelectItem value="light">Pessoa Física</SelectItem>
-												<SelectItem value="dark">Pessoa Jurídica</SelectItem>
+												<SelectItem value="individual">Pessoa Física</SelectItem>
+												<SelectItem value="company">Pessoa Jurídica</SelectItem>
 											</SelectContent>
 										</Select>
 									</div>
 
 									<div className="grid gap-3">
-										<Label htmlFor="name-1">Name</Label>
-										<Input
-											id="name-1"
-											name="name"
-											placeholder="Nome completo"
-										/>
+										{registerType === "individual" ? (
+											<>
+												<Label htmlFor="name-1">Name</Label>
+												<Input
+													id="name-1"
+													name="name"
+													placeholder="Nome completo"
+												/>
+											</>
+										) : (
+											<>
+												<Label htmlFor="name-1">Razão Social</Label>
+												<Input
+													id="name-1"
+													name="name"
+													placeholder="Razão Social"
+												/>
+											</>
+										)}
 									</div>
 
 									<div className="grid gap-3">
-										<Label htmlFor="username-1">CPF</Label>
-										<Input
-											id="username-1"
-											name="cpf"
-											placeholder="000.000.000-00"
-										/>
+										{ registerType === "individual" ? (
+											<>
+												<Label htmlFor="username-1">CPF</Label>
+												<Input
+													id="username-1"
+													name="cpf"
+													placeholder="000.000.000-00"
+												/>
+											</>
+										) : (
+											<>
+												<Label htmlFor="username-1">CNPJ</Label>
+												<Input
+													id="username-1"
+													name="cnpj"
+													placeholder="00.000.000/0000-00"
+												/>
+											</>
+										)}
+
 									</div>
 
 									<div className="grid gap-3">
 										<Label htmlFor="username-1">Email</Label>
-										<Input id="username-1" name="email" placeholder="Email" />
+										<Input id="username-1" type="email" name="email" placeholder="Email" />
 									</div>
 
 									<div className="grid gap-3">
@@ -128,7 +174,7 @@ export default function Funnels() {
 
 									<div className="grid gap-3">
 										<Label htmlFor="username-1">CEP</Label>
-										<Input id="username-1" name="cep" placeholder="00000-000" />
+										<Input id="username-1" type="number" name="cep" placeholder="00000-000" />
 									</div>
 
 									<div className="grid gap-3">
@@ -151,31 +197,44 @@ export default function Funnels() {
 								</div>
 
 								<div className="flex flex-col gap-4 mt-6">
+									{/* Esta é a area que o analista vai trabalhar em cima do cliente/lead */}
 									<Tabs defaultValue="support" className="w-[400px]">
-										<TabsList className="bg-gray-200">
+										<TabsList className="bg-gray-200 px-4 py-1">
 											<TabsTrigger value="support">Suporte</TabsTrigger>
 											<TabsTrigger value="files">Arquivos</TabsTrigger>
 											<TabsTrigger value="agenda">Agenda</TabsTrigger>
 											<TabsTrigger value="history">Histórico</TabsTrigger>
+											<TabsTrigger value="resume">Resumo</TabsTrigger>
 										</TabsList>
 										<TabsContent value="support">
-											Make changes to your account here.
+											Pedir suporte <br/><br/>
+											-analista pode falar com o clinte por diversos canais, por exemplo WhatsApp, Intagram <br/><br/>
+											-Um chate com o cliente
 										</TabsContent>
 										<TabsContent value="files">
-											Change your password here.
+											Arquivos, como contratos e etcs
 										</TabsContent>
 										<TabsContent value="agenda">
-											Change your password here.
+											Agenda do analista e possibilidade de agendendar um evento com este cliente,
+											enviar um meet para o email, mais uma mensagem no whats app
 										</TabsContent>
 										<TabsContent value="history">
-											Change your password here.
+											Histórico de solicitaçoes cliente.<br/><br/>
+											Chamado no suporte, agendamentos, pedidos, solicitaçoes, etc.
+										</TabsContent>
+										<TabsContent value="resume">
+											Resumo do cliente, com tudo que já foi feito, resumo das informacoes, etapas, pode ser gerado por uma IA.
 										</TabsContent>
 									</Tabs>
+								</div>
+
+								<div className="flex flex-col gap-4 mt-6 max-w-fit">
+									<div className="font-semibold">Status do Funil</div>
 								</div>
 							</div>
 
 							<DialogFooter>
-								<Button type="submit">Criar Card</Button>
+								<Button type="button" onClick={handleSubmit}>Criar Card</Button>
 								<DialogClose asChild>
 									<Button variant="outline">Cancelar</Button>
 								</DialogClose>
