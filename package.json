@@ -9,7 +9,6 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@caldwell619/react-kanban": "^0.0.12",
     "@hookform/resolvers": "^5.0.1",
     "@radix-ui/react-alert-dialog": "^1.1.14",
     "@radix-ui/react-dialog": "^1.1.14",
