@@ -28,16 +28,46 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChevronDown, PlusIcon, SquarePenIcon } from "lucide-react";
 import { useState } from "react";
+import {
+	DndContext,
+	closestCorners,
+	PointerSensor,
+	useSensor,
+	useSensors,
+	useDraggable,
+} from "@dnd-kit/core";
+import {
+	arrayMove,
+	SortableContext,
+	useSortable,
+	verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 interface CardProps {
 	id: number;
 	title: string;
 }
 
+interface ColumnsProps {
+	id: number;
+	title: string;
+}
+
 export default function Funnels() {
+	const [columns, setColumns] = useState<ColumnsProps[]>([]);
 	const [cards, setCard] = useState<CardProps[]>([]);
 	const [openDialog, setOpenDialog] = useState(false);
 	const [registerType, setRegisterType] = useState("individual");
+
+	const { attributes, listeners, setNodeRef, transform } = useDraggable({
+		id: "draggable",
+	});
+	const style = transform
+		? {
+				transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+			}
+		: undefined;
 
 	const handleAddCard = () => {
 		setOpenDialog(true);
@@ -93,12 +123,17 @@ export default function Funnels() {
 								<div className="grid gap-4">
 									<div className="grid gap-3">
 										<Label htmlFor="name-1">Tipo</Label>
-										<Select defaultValue="individual" onValueChange={setRegisterType}>
+										<Select
+											defaultValue="individual"
+											onValueChange={setRegisterType}
+										>
 											<SelectTrigger className="w-full">
 												<SelectValue placeholder="Pessoa ..." />
 											</SelectTrigger>
 											<SelectContent>
-												<SelectItem value="individual">Pessoa Física</SelectItem>
+												<SelectItem value="individual">
+													Pessoa Física
+												</SelectItem>
 												<SelectItem value="company">Pessoa Jurídica</SelectItem>
 											</SelectContent>
 										</Select>
@@ -127,7 +162,7 @@ export default function Funnels() {
 									</div>
 
 									<div className="grid gap-3">
-										{ registerType === "individual" ? (
+										{registerType === "individual" ? (
 											<>
 												<Label htmlFor="username-1">CPF</Label>
 												<Input
@@ -146,12 +181,16 @@ export default function Funnels() {
 												/>
 											</>
 										)}
-
 									</div>
 
 									<div className="grid gap-3">
 										<Label htmlFor="username-1">Email</Label>
-										<Input id="username-1" type="email" name="email" placeholder="Email" />
+										<Input
+											id="username-1"
+											type="email"
+											name="email"
+											placeholder="Email"
+										/>
 									</div>
 
 									<div className="grid gap-3">
@@ -174,7 +213,12 @@ export default function Funnels() {
 
 									<div className="grid gap-3">
 										<Label htmlFor="username-1">CEP</Label>
-										<Input id="username-1" type="number" name="cep" placeholder="00000-000" />
+										<Input
+											id="username-1"
+											type="number"
+											name="cep"
+											placeholder="00000-000"
+										/>
 									</div>
 
 									<div className="grid gap-3">
@@ -207,23 +251,31 @@ export default function Funnels() {
 											<TabsTrigger value="resume">Resumo</TabsTrigger>
 										</TabsList>
 										<TabsContent value="support">
-											Pedir suporte <br/><br/>
-											-analista pode falar com o clinte por diversos canais, por exemplo WhatsApp, Intagram <br/><br/>
+											Pedir suporte <br />
+											<br />
+											-analista pode falar com o clinte por diversos canais, por
+											exemplo WhatsApp, Intagram <br />
+											<br />
 											-Um chate com o cliente
 										</TabsContent>
 										<TabsContent value="files">
 											Arquivos, como contratos e etcs
 										</TabsContent>
 										<TabsContent value="agenda">
-											Agenda do analista e possibilidade de agendendar um evento com este cliente,
-											enviar um meet para o email, mais uma mensagem no whats app
+											Agenda do analista e possibilidade de agendendar um evento
+											com este cliente, enviar um meet para o email, mais uma
+											mensagem no whats app
 										</TabsContent>
 										<TabsContent value="history">
-											Histórico de solicitaçoes cliente.<br/><br/>
-											Chamado no suporte, agendamentos, pedidos, solicitaçoes, etc.
+											Histórico de solicitaçoes cliente.
+											<br />
+											<br />
+											Chamado no suporte, agendamentos, pedidos, solicitaçoes,
+											etc.
 										</TabsContent>
 										<TabsContent value="resume">
-											Resumo do cliente, com tudo que já foi feito, resumo das informacoes, etapas, pode ser gerado por uma IA.
+											Resumo do cliente, com tudo que já foi feito, resumo das
+											informacoes, etapas, pode ser gerado por uma IA.
 										</TabsContent>
 									</Tabs>
 								</div>
@@ -231,13 +283,16 @@ export default function Funnels() {
 								<div className="flex flex-col gap-4 mt-6 max-w-fit">
 									<div className="font-semibold">Status do Funil</div>
 									<div>
-										Analista pode mudar status do cliente nesta coluna, enviado diretamente para um coluna especifica.s
+										Analista pode mudar status do cliente nesta coluna, enviado
+										diretamente para um coluna especifica.s
 									</div>
 								</div>
 							</div>
 
 							<DialogFooter>
-								<Button type="button" onClick={handleSubmit}>Criar Card</Button>
+								<Button type="button" onClick={handleSubmit}>
+									Criar Card
+								</Button>
 								<DialogClose asChild>
 									<Button variant="outline">Cancelar</Button>
 								</DialogClose>
@@ -246,97 +301,105 @@ export default function Funnels() {
 					</DialogContent>
 				</Dialog>
 
-				<div className="grid grid-cols-4 gap-4 h-full">
-					<div className="shadow rounded-t-md flex flex-col">
-						<div className="flex justify-between items-center p-3 py-4 bg-white font-semibold rounded-t-md z-10">
-							<div>
-								<span>Em Andamento</span>
-								<span className="ml-2 px-2.5 py-0.5 border rounded-full text-xs">
-									0
-								</span>
-							</div>
+				<div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+					<DndContext
+						sensors={sensors}
+						collisionDetection={closestCorners}
+						onDragEnd={handleDragEnd}
+					>
+						<div className="grid grid-cols-4 gap-4 h-full">
+							<div className="shadow rounded-t-md flex flex-col">
+								<div className="flex justify-between items-center p-3 py-4 bg-white font-semibold rounded-t-md z-10">
+									<div>
+										<span>Em Andamento</span>
+										<span className="ml-2 px-2.5 py-0.5 border rounded-full text-xs">
+											0
+										</span>
+									</div>
 
-							<div className="text-xl">
-								<Button onClick={handleAddCard} variant={"ghost"}>
-									<PlusIcon size={20} />
-								</Button>
-							</div>
-						</div>
-
-						<div className="h-full border">
-							{cards && cards.length > 0 ? (
-								cards.map((card) => (
-									<Card key={card.id} className="m-2">
-										<CardHeader>
-											<CardTitle>{card.title}</CardTitle>
-										</CardHeader>
-									</Card>
-								))
-							) : (
-								<Card className="text-center m-2 border-dashed gap-0 text-sm">
-									<CardHeader>
-										<CardDescription className="italic text-gray-500 text-xs">
-											Nenhum card nesta coluna
-										</CardDescription>
-									</CardHeader>
-									<CardFooter className="justify-center">
-										<Button
-											onClick={handleAddCard}
-											className="hover:bg-gray-100 border-none shadow-none"
-										>
-											<PlusIcon size={16} />
-											<span>Adicionar Card</span>
+									<div className="text-xl">
+										<Button onClick={handleAddCard} variant={"ghost"}>
+											<PlusIcon size={20} />
 										</Button>
-									</CardFooter>
-								</Card>
-							)}
-						</div>
-					</div>
-
-					<div className="border rounded shadow flex flex-col">
-						<div>
-							<div className="flex justify-between items-center p-3 bg-white font-semibold border-b">
-								<div>
-									<span>Em Andamento</span>
-									<span className="ml-2 px-2.5 py-0.5 border rounded-full text-xs">
-										{cards?.length || 0}
-									</span>
+									</div>
 								</div>
 
-								<div className="text-xl">+</div>
-							</div>
-						</div>
-					</div>
-
-					<div className="border rounded shadow flex flex-col">
-						<div>
-							<div className="flex justify-between items-center p-3 bg-white font-semibold border-b">
-								<div>
-									<span>Em Andamento</span>
-									<span className="ml-2 px-2.5 py-0.5 border rounded-full text-xs">
-										0
-									</span>
+								<div className="h-full border">
+									{cards && cards.length > 0 ? (
+										cards.map((card) => (
+											<Card key={card.id} className="m-2">
+												<CardHeader>
+													<CardTitle>{card.title}</CardTitle>
+												</CardHeader>
+											</Card>
+										))
+									) : (
+										<Card className="text-center m-2 border-dashed gap-0 text-sm">
+											<CardHeader>
+												<CardDescription className="italic text-gray-500 text-xs">
+													Nenhum card nesta coluna
+												</CardDescription>
+											</CardHeader>
+											<CardFooter className="justify-center">
+												<Button
+													onClick={handleAddCard}
+													className="hover:bg-gray-100 border-none shadow-none"
+												>
+													<PlusIcon size={16} />
+													<span>Adicionar Card</span>
+												</Button>
+											</CardFooter>
+										</Card>
+									)}
 								</div>
-
-								<div className="text-xl">+</div>
 							</div>
-						</div>
-					</div>
 
-					<div className="border rounded shadow flex flex-col">
-						<div>
-							<div className="flex justify-between items-center p-3 bg-white font-semibold border-b">
+							<div className="border rounded shadow flex flex-col">
 								<div>
-									<span>Em Andamento</span>
-									<span className="ml-2 px-2.5 py-0.5 border rounded-full text-xs">
-										0
-									</span>
-								</div>
+									<div className="flex justify-between items-center p-3 bg-white font-semibold border-b">
+										<div>
+											<span>Em Andamento</span>
+											<span className="ml-2 px-2.5 py-0.5 border rounded-full text-xs">
+												{cards?.length || 0}
+											</span>
+										</div>
 
-								<div className="text-xl">+</div>
+										<div className="text-xl">+</div>
+									</div>
+								</div>
+							</div>
+
+							<div className="border rounded shadow flex flex-col">
+								<div>
+									<div className="flex justify-between items-center p-3 bg-white font-semibold border-b">
+										<div>
+											<span>Em Andamento</span>
+											<span className="ml-2 px-2.5 py-0.5 border rounded-full text-xs">
+												0
+											</span>
+										</div>
+
+										<div className="text-xl">+</div>
+									</div>
+								</div>
+							</div>
+
+							<div className="border rounded shadow flex flex-col">
+								<div>
+									<div className="flex justify-between items-center p-3 bg-white font-semibold border-b">
+										<div>
+											<span>Em Andamento</span>
+											<span className="ml-2 px-2.5 py-0.5 border rounded-full text-xs">
+												0
+											</span>
+										</div>
+
+										<div className="text-xl">+</div>
+									</div>
+								</div>
 							</div>
 						</div>
-					</div>
+					</DndContext>
 				</div>
 			</main>
 		</div>
