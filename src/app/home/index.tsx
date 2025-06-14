@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PlusIcon } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
 	DndContext,
 	closestCorners,
@@ -66,24 +66,98 @@ interface ColumnsProps {
 	cards?: CardProps[];
 }
 
+// Passar para outro arquivo
+export function NotContentCard() {
+	return (
+		<Card className="text-center m-2 border-dashed gap-0 text-sm">
+			<CardHeader>
+				<CardDescription className="italic text-gray-500 text-xs">
+					Nenhum card nesta coluna
+				</CardDescription>
+			</CardHeader>
+			<CardFooter className="justify-center">
+				<Button
+					// TODO Add to context
+					// onClick={() => handleAddCard()}
+					className="hover:bg-gray-100 border-none shadow-none"
+				>
+					<PlusIcon size={16} />
+					<span>Adicionar Card</span>
+				</Button>
+			</CardFooter>
+		</Card>
+	);
+}
+
+export function ColumContainer(card: CardProps) {
+	const {
+		attributes,
+		listeners,
+		setNodeRef,
+		transform,
+		transition,
+		isDragging,
+	} = useSortable({
+		id: card.id,
+		data: {
+			type: "card",
+		},
+	});
+
+	const style = {
+		transition,
+		transform: CSS.Transform.toString(transform),
+	};
+
+	if (isDragging) {
+		return (
+			<Card
+				key={card.id}
+				className="m-2"
+				ref={setNodeRef}
+				style={style}
+				{...attributes}
+				{...listeners}
+			>
+				<CardHeader>
+					<CardTitle>{card.title}</CardTitle>
+				</CardHeader>
+				<CardDescription className="text-gray-500 text-xs italic">
+					Arraste para reorganizar
+				</CardDescription>
+			</Card>
+		);
+	}
+
+	return (
+		<Card
+			key={card.id}
+			className="m-2"
+			ref={setNodeRef}
+			style={style}
+			{...attributes}
+			{...listeners}
+		>
+			<CardHeader>
+				<CardTitle>{card.title}</CardTitle>
+			</CardHeader>
+		</Card>
+	);
+}
+
 export default function Funnels() {
 	const [columns, setColumns] = useState<ColumnsProps[]>(initialColumns);
 	const [cards, setCard] = useState<CardProps[]>([]);
 	const [openDialog, setOpenDialog] = useState(false);
 	const [registerType, setRegisterType] = useState("individual");
 
+	const cardsIds = useMemo(() => {
+		return cards.map((card) => card.id);
+	}, [cards]);
+
 	const mouseSensor = useSensor(MouseSensor); // Initialize mouse sensor
 	const touchSensor = useSensor(TouchSensor); // Initialize touch sensor
 	const sensors = useSensors(mouseSensor, touchSensor);
-
-	const { attributes, listeners, setNodeRef, transform } = useDraggable({
-		id: "draggable",
-	});
-	const style = transform
-		? {
-				transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-			}
-		: undefined;
 
 	const handleDragEnd = (event: any) => {
 		const { active, over } = event;
@@ -315,77 +389,57 @@ export default function Funnels() {
 					</DialogContent>
 				</Dialog>
 
-				<div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-					<DndContext
-						sensors={sensors}
-						collisionDetection={closestCorners}
-						onDragEnd={handleDragEnd}
-					>
-						{/* Div Kanban Container */}
-						<div className="grid grid-cols-4 gap-4 h-full">
-							{columns && columns.length > 0 ? (
-								columns.map((column) => (
-									<div
-										className="shadow rounded-t-md flex flex-col"
-										key={column.id}
-									>
-										<div className="flex justify-between items-center p-3 py-4 bg-white font-semibold rounded-t-md z-10">
-											<div>
-												<span>{column.title}</span>
-												<span className="ml-2 px-2.5 py-0.5 border rounded-full text-xs">
-													0
-												</span>
-											</div>
-
-											<div className="text-xl">
-												<Button
-													onClick={() => handleAddCard(column.id)}
-													variant={"ghost"}
-												>
-													<PlusIcon size={20} />
-												</Button>
-											</div>
+				<DndContext
+					sensors={sensors}
+					collisionDetection={closestCorners}
+					onDragEnd={handleDragEnd}
+				>
+					{/* Div Kanban Container */}
+					<div className="grid grid-cols-4 gap-4 h-full">
+						{columns && columns.length > 0 ? (
+							columns.map((column) => (
+								<div
+									className="shadow rounded-t-md flex flex-col"
+									key={column.id}
+								>
+									<div className="flex justify-between items-center p-3 py-4 bg-white font-semibold rounded-t-md z-10">
+										<div>
+											<span>{column.title}</span>
+											<span className="ml-2 px-2.5 py-0.5 border rounded-full text-xs">
+												0
+											</span>
 										</div>
 
-										<div className="h-full border">
+										<div className="text-xl">
+											<Button
+												onClick={() => handleAddCard(column.id)}
+												variant={"ghost"}
+											>
+												<PlusIcon size={20} />
+											</Button>
+										</div>
+									</div>
+
+									<div className="h-full border">
+										<SortableContext items={cardsIds}>
 											{cards && cards.length > 0 ? (
 												cards
 													.filter((card) => card.columnId === column.id)
 													.map((card) => (
-														<Card key={card.id} className="m-2">
-															<CardHeader>
-																<CardTitle>{card.title}</CardTitle>
-															</CardHeader>
-														</Card>
+														<ColumContainer key={card.id} {...card} />
 													))
 											) : (
-												<Card className="text-center m-2 border-dashed gap-0 text-sm">
-													<CardHeader>
-														<CardDescription className="italic text-gray-500 text-xs">
-															Nenhum card nesta coluna
-														</CardDescription>
-													</CardHeader>
-													<CardFooter className="justify-center">
-														<Button
-															onClick={() => handleAddCard(column.id)}
-															className="hover:bg-gray-100 border-none shadow-none"
-														>
-															<PlusIcon size={16} />
-															<span>Adicionar Card</span>
-														</Button>
-													</CardFooter>
-												</Card>
+												<NotContentCard />
 											)}
-										</div>
+										</SortableContext>
 									</div>
-								))
-							) : (
-								<div>Nada</div>
-							)}
-							{/* Colum */}
-						</div>
-					</DndContext>
-				</div>
+								</div>
+							))
+						) : (
+							<div>Nada</div>
+						)}
+					</div>
+				</DndContext>
 			</main>
 		</div>
 	);
