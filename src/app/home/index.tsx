@@ -26,28 +26,29 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PlusIcon } from "lucide-react";
-import { useMemo, useState } from "react";
 import {
 	DndContext,
-	closestCorners,
+	MouseSensor,
 	PointerSensor,
+	TouchSensor,
+	closestCorners,
+	useDraggable,
+	useDroppable,
 	useSensor,
 	useSensors,
-	useDraggable,
-	MouseSensor,
-	TouchSensor,
 } from "@dnd-kit/core";
 import {
-	arrayMove,
 	SortableContext,
+	arrayMove,
 	useSortable,
 	verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { PlusIcon } from "lucide-react";
+import { useMemo, useState } from "react";
 import { KanbanHeader } from "./components/KanbanHeader";
 
-const initialColumns: ColumnsProps[] = [
+const initialColumns: KanbanColumnsProps[] = [
 	{ id: 1, title: "Em contato" },
 	{ id: 2, title: "Aguardando" },
 	{ id: 3, title: "Concluído" },
@@ -60,7 +61,7 @@ interface CardProps {
 	title: string;
 }
 
-interface ColumnsProps {
+interface KanbanColumnsProps {
 	id: number;
 	title: string;
 	cards?: CardProps[];
@@ -88,6 +89,115 @@ export function NotContentCard() {
 		</Card>
 	);
 }
+
+interface KanbanCardProps {
+	id: string;
+	// posição do card no kanban
+	index: number;
+	parentId: string;
+	title: string;
+}
+export function KanbanCard(card: KanbanCardProps) {
+	const { attributes, listeners, setNodeRef, transform } = useDraggable({
+		id: card.id,
+		data: {
+			index: card.index,
+			parentId: card.parentId
+		},
+	});
+
+	  const style = {
+		transform: CSS.Translate.toString(transform),
+	  };
+
+	  return (
+		<Card
+			key={card.id}
+			className="m-2"
+			ref={setNodeRef}
+			style={style}
+			{...attributes}
+			{...listeners}
+		>
+			<CardHeader>
+				<CardTitle>{card.title}</CardTitle>
+			</CardHeader>
+		</Card>
+	  );
+}
+
+export function KanbanColumns(column: KanbanColumnsProps) {
+	const [cards, setCard] = useState<KanbanCardProps[]>([]);
+
+	const { setNodeRef } = useDroppable({
+	  id: column.id,
+	});
+
+	const cardsIds = useMemo(() => {
+		return cards.map((card) => card.id);
+	}, [cards]);
+
+	const handleAddCard = (columnId: string | number) => {
+		console.log("Adding card to column:", columnId);
+
+		// setOpenDialog(true);
+
+		setCard((prevCards) => [
+			...prevCards,
+			{
+				id: (prevCards.length + 1).toString(),
+				index: prevCards.length,
+				parent: columnId.toString(),
+				columnId: columnId,
+				title: `Card ${prevCards.length + 1}`,
+			},
+		]);
+	};
+
+
+	return (
+		<div
+			className="shadow rounded-t-md flex flex-col"
+			key={column.id}
+			ref={setNodeRef}
+		>
+			<div className="flex justify-between items-center p-3 py-4 bg-white font-semibold rounded-t-md z-10">
+				<div>
+					<span>{column.title}</span>
+					<span className="ml-2 px-2.5 py-0.5 border rounded-full text-xs">
+						0
+					</span>
+				</div>
+
+				<div className="text-xl">
+					<Button
+						onClick={() => handleAddCard(column.id)}
+						variant={"ghost"}
+					>
+						<PlusIcon size={20} />
+					</Button>
+				</div>
+			</div>
+
+			<div className="h-full border">
+				<SortableContext items={cardsIds}>
+					{cards && cards.length > 0 ? (
+						cards
+							.filter((card) => card.columnId === column.id)
+							.map((card) => (
+								// 	  {items.map(({ title: cardTitle }, key) => (
+								// 		<KanbanCard title={cardTitle} key={key} index={key} parent={title} />
+								// 	  ))}
+								<KanbanCard key={card.id} {...card} />
+							))
+					) : (
+						<NotContentCard />
+					)}
+				</SortableContext>
+			</div>
+		</div>
+	);
+  }
 
 export function ColumContainer(card: CardProps) {
 	const {
@@ -130,30 +240,14 @@ export function ColumContainer(card: CardProps) {
 	}
 
 	return (
-		<Card
-			key={card.id}
-			className="m-2"
-			ref={setNodeRef}
-			style={style}
-			{...attributes}
-			{...listeners}
-		>
-			<CardHeader>
-				<CardTitle>{card.title}</CardTitle>
-			</CardHeader>
-		</Card>
+		<div>Card</div>
 	);
 }
 
 export default function Funnels() {
-	const [columns, setColumns] = useState<ColumnsProps[]>(initialColumns);
-	const [cards, setCard] = useState<CardProps[]>([]);
+	const [columns, setColumns] = useState<KanbanColumnsProps[]>(initialColumns);
 	const [openDialog, setOpenDialog] = useState(false);
 	const [registerType, setRegisterType] = useState("individual");
-
-	const cardsIds = useMemo(() => {
-		return cards.map((card) => card.id);
-	}, [cards]);
 
 	const mouseSensor = useSensor(MouseSensor); // Initialize mouse sensor
 	const touchSensor = useSensor(TouchSensor); // Initialize touch sensor
@@ -170,30 +264,54 @@ export default function Funnels() {
 		}
 	};
 
-	const handleAddCard = (columnId: string | number) => {
-		console.log("Adding card to column:", columnId);
-
-		setOpenDialog(true);
-
-		setCard((prevCards) => [
-			...prevCards,
-			{
-				id: prevCards.length + 1,
-				columnId: columnId,
-				title: `Card ${prevCards.length + 1}`,
-			},
-		]);
-	};
-
 	function handleSubmit() {
 		setCard((prevCards) => [
 			...prevCards,
 			{
-				id: prevCards.length + 1,
+				id: (prevCards.length + 1).toString(),
+				index: prevCards.length,
+				parent: "",
+				columnId: "",
 				title: `Card ${prevCards.length + 1}`,
 			},
 		]);
 	}
+
+	// Kanban BoardContext
+	const [lanes, setLanes] = useState<LaneItems>({
+		ToDo: [],
+		"In Progress": [],
+		Done: [],
+		Unassigned: [],
+	  });
+	
+	  const addNewCard = (title: string) => {
+		setLanes((prev) => ({
+		  ...prev,
+		  Unassigned: [...(prev.Unassigned || []), { title }],
+		}));
+	  };
+	
+	  const moveCard = (
+		fromLane: string,
+		toLane: string,
+		cardIndex: number,
+		card: Cards
+	  ) => {
+		setLanes((prev) => {
+		  const fromItems = [...(prev[fromLane] || [])];
+		  const toItems = [...(prev[toLane] || [])];
+	
+		  fromItems.splice(cardIndex, 1); // remove from original
+		  toItems.push(card); // add to new lane
+	
+		  return {
+			...prev,
+			[fromLane]: fromItems,
+			[toLane]: toItems,
+		  };
+		});
+	  };
 
 	return (
 		<div className="flex flex-col h-screen p-8">
@@ -392,48 +510,22 @@ export default function Funnels() {
 				<DndContext
 					sensors={sensors}
 					collisionDetection={closestCorners}
-					onDragEnd={handleDragEnd}
+					onDragEnd={(e) => {
+						const toParentId = e.over?.id;
+						const parentId = e.active.data.current?.parentId ?? "";
+						const index = e.active.data.current?.index ?? 0;
+						const fromParent = e.active.data.current?.parent;
+
+						if (!toParent || fromParent === toParent) return;
+
+						moveCard(fromParent, toParent, index, parentId);
+					  }}
 				>
 					{/* Div Kanban Container */}
 					<div className="grid grid-cols-4 gap-4 h-full">
 						{columns && columns.length > 0 ? (
 							columns.map((column) => (
-								<div
-									className="shadow rounded-t-md flex flex-col"
-									key={column.id}
-								>
-									<div className="flex justify-between items-center p-3 py-4 bg-white font-semibold rounded-t-md z-10">
-										<div>
-											<span>{column.title}</span>
-											<span className="ml-2 px-2.5 py-0.5 border rounded-full text-xs">
-												0
-											</span>
-										</div>
-
-										<div className="text-xl">
-											<Button
-												onClick={() => handleAddCard(column.id)}
-												variant={"ghost"}
-											>
-												<PlusIcon size={20} />
-											</Button>
-										</div>
-									</div>
-
-									<div className="h-full border">
-										<SortableContext items={cardsIds}>
-											{cards && cards.length > 0 ? (
-												cards
-													.filter((card) => card.columnId === column.id)
-													.map((card) => (
-														<ColumContainer key={card.id} {...card} />
-													))
-											) : (
-												<NotContentCard />
-											)}
-										</SortableContext>
-									</div>
-								</div>
+								<KanbanColumns key={column.id} {...column} />
 							))
 						) : (
 							<div>Nada</div>
